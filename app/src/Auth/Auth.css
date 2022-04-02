@@ -1,0 +1,24 @@
+.grid-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.grid-wrapper {
+    display: flex;
+    width: 100%;
+    position: relative;
+}
+
+.grid-item-wrapper {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+.grid-item {
+    /* grid-row: 1 / 2; */
+    display: flex;
+    transition: all 250ms linear;
+    scrollbar-width: none;
+}
+
