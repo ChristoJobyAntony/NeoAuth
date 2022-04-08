@@ -46,7 +46,7 @@ def get_image_sets (db : Session, exclude : List[schemas.BaseImageSet]) -> None 
             imgSets.remove(imgSet)
     return imgSets
 
-async def increment_attempt (db : Session, imageSet : models.ImageSet) : 
+def increment_attempt (db : Session, imageSet : models.ImageSet) : 
     imageSet  = db.query(models.ImageSet).filter(models.ImageSet.uid == imageSet.uid).first()
     imageSet.attempts += 1
     db.commit()

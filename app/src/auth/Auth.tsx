@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import  Register from "./components/Register";
-import Login from "./components/Login";
+import  Register from "./register/Register";
+import Login from "./login/Login";
 import {Box, Grid} from "@mui/material";
 import { height } from "@mui/system";
 

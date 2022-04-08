@@ -3,12 +3,12 @@ import { Box, Typography} from "@mui/material";
 import "./css/Carousel.css"
 
 
-export const CarouselItem = (props : {children : JSX.Element, key? : string, style?: React.CSSProperties }) => {
+export const CarouselItem = (props : {children : JSX.Element, key? : string, width ?: string }) => {
 
     return(
         <div 
             className="carousel-item" 
-            style={props.style}>
+            style={{width : (props.width ? props.width : "100%")}}>
                 {props.children}
         </div>
     )
@@ -24,8 +24,8 @@ export const Carousel = (props : CarouselProps ) => {
     return (
         <div className="carousel" style={props.style}>
             <div className="inner"  style={{transform : `translateX(-${props.activeIndex * 100}%)`}} >
-                {props.children.map((child) => {
-                    return React.cloneElement(child, {style : {width: "100%"}} );
+                {props.children.map((child, i) => {
+                    return React.cloneElement(child, {width : "100%", key: `carousel_item_${i}`});
                 })}
             </div>
         </div>

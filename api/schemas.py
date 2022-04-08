@@ -1,4 +1,3 @@
-from os import access
 from typing import List
 from pydantic import BaseModel
 

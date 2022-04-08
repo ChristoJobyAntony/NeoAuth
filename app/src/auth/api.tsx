@@ -1,9 +1,7 @@
 import axios from 'axios'
-import base_api from '../api'
+import base_api  from '../api'
+import { setURLAccessToken } from '../api'
 
-type authImage = {
-    uid : string,
-}
 
 
 export async function checkEmailExists (email : string)  {
@@ -40,36 +38,16 @@ export async function registerUser (name : string, email : string, objects : {ui
     return response;
 }
 
-export async function loginUser (email : string, images : string[]) {
-    try {
-        const data = {
-            email : email,
-            images : images.map((uid) => {return {uid : uid}})
-        }
-        console.log(data);
-        console.log(images);
-        console.log(data.images);
-        
-        const response = await base_api.post("/auth/login", data);
-        console.log(response.data);
-        
-        return response.data.message
-    }catch(e) {
-        console.log("authentication error");
-        return false
-        
-    }
+export async function signOut () {
+    // need to pass a request to server to note sign-out time
 }
 
-export async function authUser (email : string, images : string[]) {
+export async function signIn (email : string, images : string[]) {
     try {
         const data = {
             email : email,
             images : images.map((uid) => {return {uid : uid}})
-        }
-        console.log(data);
-        console.log(images);
-        console.log(data.images);
+        };
         
         const response = await axios.request({
             headers:{'Content-Type': 'application/x-www-form-urlencoded'},
@@ -77,21 +55,18 @@ export async function authUser (email : string, images : string[]) {
             method: "post",
             baseURL: base_api.defaults.baseURL,
             data: `grant_type=password&username=${email}&password=${images.join('-')}`
-        })
-        console.log(response.data);
-        base_api.defaults.headers.common = {'Authorization': `Bearer ${response.data.access_token}`}
-        getUser()
-        return true
-    }catch(e) {
-        console.log("authentication error");
-        return false
-        
+        });
+        const token : string = response.data.access_token;
+        return token;
+    }catch (e) {
+        throw Error (`Authentication failed`);
     }
 }
 
 export async function getUser () {
-    console.log(await base_api.get("/user/info"));
-    
+    const user : {email : string, name : string } = (await base_api.get("/user/info")).data;
+    if (!user) {throw Error("Cannot retrieve credentials")};
+    return user;
 }
 
 export async function getObjectsInfo () {
@@ -107,9 +82,8 @@ export default {
     checkEmailExists,
     getImageSet,
     getImageUrl,
-    loginUser,
     registerUser,
-    authUser,
+    signIn,
     getUser,
     getObjectsInfo,
     getObject,
