@@ -1,6 +1,6 @@
 __pycache__
 .vscode
-images
+images/*
 secrets/*
 poetry.lock
 downloads
