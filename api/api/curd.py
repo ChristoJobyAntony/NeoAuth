@@ -54,11 +54,11 @@ def increment_attempt (db : Session, imageSet : models.ImageSet) :
 if __name__ == "__main__" : 
     from .images import imageSetGenerator
     models.Base.metadata.create_all(engine)
-    db = get_db().__next__()
-    i = imageSetGenerator(db, 16)
-    i = get_image_set(db, i)
+    DB_NAME = get_db().__next__()
+    i = imageSetGenerator(DB_NAME, 16)
+    i = get_image_set(DB_NAME, i)
     # remove_image_set(db, i, "./API/images/")
-    db.close()
+    DB_NAME.close()
 
 
 

@@ -16,6 +16,7 @@ from .objects import uploadObjects
 from .config import *
 
 models.Base.metadata.create_all(engine)
+uploadObjects(get_db().__next__())
 
 app = FastAPI()
 # Image Configs
@@ -23,6 +24,8 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://christojobyantony.zapto.org:4001",
+    "https://neoauth.christojobyantony.me",
+    "http://192.168.0.140"
 ]
 
 app.add_middleware(

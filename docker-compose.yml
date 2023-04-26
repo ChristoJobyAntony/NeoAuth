@@ -1,0 +1,50 @@
+version: "3"
+services:
+  db:
+    container_name: neoauth-db
+    image: mariadb:10.9
+    networks:
+      - base_network
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD
+      - MYSQL_DATABASE
+      - MYSQL_USER
+
+    volumes:
+      - db:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+
+  api:
+    container_name: neoauth-api
+    networks:
+      - base_network
+    build: ./api/
+    command: poetry run python main.py
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PORT
+      - JWT_SECRET_KEY
+    volumes:
+      - image_bucket:/app/api/images
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: neoauth-nginx
+    networks:
+      - base_network
+    ports:
+      - 8092:80
+    volumes:
+      - /home/christo/Code/NeoAuth/app/build:/usr/share/nginx/html
+      - /home/christo/Code/NeoAuth/app/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+
+volumes:
+  db:
+  image_bucket:
+
+networks:
+  base_network:

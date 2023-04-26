@@ -1,5 +1,5 @@
 import React from "react";
-import {deepPurple, deepOrange, purple} from '@mui/material/colors';
+import { deepOrange, purple} from '@mui/material/colors';
 import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/styles'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SnackbarProvider } from 'notistack';
@@ -33,7 +33,7 @@ theme = responsiveFontSizes(theme);
 
 const App = () => {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/">
             <ThemeProvider theme={theme}>
                 <AuthProvider>
                     <SnackbarProvider autoHideDuration={2000} >

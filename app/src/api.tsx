@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const base_api = axios.create({
-    baseURL: 'http://christojobyantony.zapto.org:5000/neoauth/',
+    baseURL: '/api/',
     timeout: 5000,
     timeoutErrorMessage: "Network Error"
 })

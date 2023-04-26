@@ -2,7 +2,7 @@ const prod = process.env.NODE_ENV === 'production';
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
+console.log(`${ process.env.NODE_ENV} <=> ${prod}`);
 module.exports = {
   mode: prod ? 'production' : 'development',
   entry: './src/index.tsx',
@@ -33,6 +33,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
+      publicPath: '/'
     }),
     new MiniCssExtractPlugin(),
   ],

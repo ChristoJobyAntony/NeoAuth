@@ -72,11 +72,11 @@ def removeImages (images : List[models.Image]) :
 
 if __name__ == "__main__" : 
     models.Base.metadata.create_all(engine)
-    db = get_db().__next__()
-    img = imageSetGenerator(db, 16) 
-    db.delete(img)
-    db.commit()
-    db.close()
+    DB_NAME = get_db().__next__()
+    img = imageSetGenerator(DB_NAME, 16) 
+    DB_NAME.delete(img)
+    DB_NAME.commit()
+    DB_NAME.close()
 
 
 
