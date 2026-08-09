@@ -1,42 +1,61 @@
-import { Button } from "@mui/material";
+import { Box, ButtonBase } from "@mui/material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import React from "react";
 
-import { Image, Challenge} from "../../types";
-import {getImageUrl} from "../../api";
+import { Image } from "../../types";
+import { getImageUrl } from "../../api";
+import { tokens } from "../../../theme";
 
 type props = {
-    image : Image,
-    challenge : Challenge,
+    image: Image,
+    position: number,
+    selected: boolean,
     onSelect: () => void
 }
 
-export function ImageButton ({image, challenge, onSelect}: props) {
+export function ImageButton({ image, position, selected, onSelect }: props) {
     return (
-        <Button 
-            variant="outlined"
-            key={image.uid}
+        <ButtonBase
+            focusRipple
+            aria-pressed={selected}
             style={{
-                width:"100%",
+                width: "100%",
                 height: "auto",
                 aspectRatio: "1",
-                border:"2px solid black",
-                padding:"0px",
-                borderColor: (image.uid === challenge.selection?.uid) ? "red" : "black"
+                borderRadius: "10px",
+                border: selected ? `3px solid ${tokens.cobalt}` : `1px solid ${tokens.line}`,
+                backgroundColor: "#fff",
+                padding: 0,
+                position: "relative",
+                overflow: "hidden",
+                transition: "border-color 120ms ease, transform 120ms ease",
             }}
             onClick={() => onSelect()}
-            >
+        >
             <img
                 style={{
-                    width:"100%",
-                    height: undefined,
-                    aspectRatio: "1",
-                    objectFit: "contain"
-                }} 
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                }}
                 src={getImageUrl(image.uid)}
-                loading="lazy"/>
-        </Button>
+                alt={`Challenge image ${position}`}
+                loading="lazy" />
+            {selected &&
+                <Box sx={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    lineHeight: 0,
+                    color: tokens.cobalt,
+                    backgroundColor: "#fff",
+                    borderRadius: "50%",
+                }}>
+                    <CheckCircleIcon fontSize="small" />
+                </Box>}
+        </ButtonBase>
     )
-
 }
 
 export default ImageButton;

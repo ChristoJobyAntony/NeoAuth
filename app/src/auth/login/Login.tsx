@@ -1,131 +1,124 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 
-import {Carousel} from  "../../components/Carousel"
+import { Carousel } from "../../components/Carousel"
 import ChallengeSlide from "./components/ChallengeSlide";
 import EmailSlide from "./components/EmailSlide";
-import {getImageSet} from "../api";
+import { getChallenge } from "../api";
 import { useAuth } from "../components/AuthProvider";
-import { Form, ImageSet, Challenge } from "../types";
+import { Form, Image, ServerChallenge } from "../types";
+import { logEvent, startTimer } from "../../metrics";
 
-const MIN_CHALLENGES = 4;
-const MAX_CHALLENGES = 8;
-const initialChallengeSet : Challenge[] = [];
-for (let i = 0; i < MIN_CHALLENGES; i++ ) {
-    initialChallengeSet.push({
-        imageSet : undefined,
-        selection : undefined,
-    });
-}
+const MIN_ANSWERS = 6;
 
-
-function Login () {
-    // const swiper = useSwiper();
+function Login() {
     const navigate = useNavigate();
     const auth = useAuth();
-    const {enqueueSnackbar} = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
     const [slide, setSlide] = useState<number>(0);
-    const [challenges, setChallenges] = useState<Challenge[]>(initialChallengeSet.slice());
+    const [challenge, setChallenge] = useState<ServerChallenge | null>(null);
+    const [selections, setSelections] = useState<(Image | undefined)[]>([]);
+    const [loginTimer, setLoginTimer] = useState<(() => number) | null>(null);
+    const [answerTimer, setAnswerTimer] = useState<(() => number) | null>(null);
     const [email, setEmail] = useState<Form>({
-        value : "", 
-        helperText : "", 
+        value: "",
+        helperText: "",
         error: false
-        });
+    });
 
-    function updateChallenges(index:number, newChallenge : Partial<Challenge>) {
-        const newChallenges = challenges.slice();
-         newChallenges[index] = {...newChallenges[index], ...newChallenge}
-        setChallenges(newChallenges);
-    }
-    
-    async function loadImageSet(index : number) {
-        const excludeSet : string[] = []
-        for (let i =0; i < index; i ++) {
-            let c = challenges[i]
-            excludeSet.push(c.imageSet!.uid)
+    async function startChallenge() {
+        try {
+            const fresh = await getChallenge(email.value);
+            setChallenge(fresh);
+            setSelections(new Array(fresh.image_sets.length).fill(undefined));
+            setSlide(1);
+            setLoginTimer(() => startTimer());
+            setAnswerTimer(() => startTimer());
+            logEvent("login_start");
+        } catch (e) {
+            enqueueSnackbar("Could not start a sign-in challenge — please try again", { variant: "error" });
         }
-        const imageSet : ImageSet = await getImageSet(email.value!, excludeSet)
-        updateChallenges(index, {imageSet : imageSet})
     }
 
-    async function onNextChallenge (current_challenge : number) {
-        if (! challenges[current_challenge].selection) return enqueueSnackbar("Select an image", { variant: "error"})
-        if (current_challenge + 1 >= MAX_CHALLENGES) return enqueueSnackbar("Maximum Challenges reached", {variant : "error"})
-        if (current_challenge + 1 == challenges.length ){
-            const newChallenges = challenges.slice();
-            newChallenges.push({imageSet: undefined, selection: undefined});
-            setChallenges(newChallenges);
-        }
-        console.log(challenges);
-        if (! challenges[current_challenge+1]?.imageSet ) loadImageSet(current_challenge+1)
-        setSlide(current_challenge+2);
+    function selectImage(index: number, image: Image) {
+        const update = selections.slice();
+        update[index] = image;
+        setSelections(update);
+    }
+
+    function answeredCount() {
+        let count = 0;
+        while (count < selections.length && selections[count]) count++;
+        return count;
+    }
+
+    function onNext(index: number) {
+        if (!selections[index]) return enqueueSnackbar("Select an image first", { variant: "error" })
+        if (answerTimer) logEvent("challenge_answer", answerTimer(), { index });
+        setAnswerTimer(() => startTimer());
+        setSlide(index + 2);
     }
 
     async function resetAttempt() {
-        const initialChallengeSet : Challenge[] = [];
-        for (let i = 0; i < MIN_CHALLENGES; i++ ) {
-        initialChallengeSet.push({
-            imageSet : undefined,
-            selection : undefined,
-        });}
+        setChallenge(null);
+        setSelections([]);
         setSlide(0);
-        setChallenges(initialChallengeSet);        
     }
 
-    async function  onLogin () {
-        const images = challenges
-        .filter((challenge) => challenge.selection?.uid)
-        .map((challenge) => challenge.selection?.uid!);
+    async function onLogin(index: number) {
+        if (!selections[index]) return enqueueSnackbar("Select an image first", { variant: "error" })
+        if (answerTimer) logEvent("challenge_answer", answerTimer(), { index });
+        const images = selections.slice(0, index + 1).map((image) => image!.uid);
 
         try {
-            await auth.signIn(email.value, images);
-            enqueueSnackbar("Logged in successfully", {variant : "success"});
+            await auth.signIn(email.value, challenge!.uid, images);
+            if (loginTimer) logEvent("login_success", loginTimer(), { answers: images.length });
+            enqueueSnackbar("Signed in", { variant: "success" });
             navigate("/dash");
-        }catch (e){
+        } catch (e) {
+            if (loginTimer) logEvent("login_fail", loginTimer(), { answers: images.length });
             resetAttempt();
-            enqueueSnackbar(String(e), {variant: "error"});
-            setSlide(0);
+            enqueueSnackbar("That sequence didn't match — a new challenge has been issued", { variant: "error" });
         }
     }
 
     return (
-            <Carousel 
+        <Carousel
             activeIndex={slide}
             style={{
                 height: "100%",
                 width: "100%",
-                borderRadius : "10px",
+                borderRadius: "14px",
             }}>
-                
-                <EmailSlide 
-                    email={email} 
-                    setEmail={setEmail}
-                    callBack={()=>{
-                        setSlide(1);
-                        loadImageSet(0);
-                    }}/>
 
+            <EmailSlide
+                email={email}
+                setEmail={setEmail}
+                callBack={startChallenge} />
 
-                
-                <React.Fragment key={"auth__login__carousel_item__challenges"}>
+            <React.Fragment key={"auth__login__carousel_item__challenges"}>
                 {
-                    challenges.map((challenge, index) =>{return(
-                        <ChallengeSlide 
-                            index={index}
-                            challenge={challenge}
-                            updateChallenge={(challenge) => updateChallenges(index, challenge)}
-                            onNext={() => onNextChallenge(index)}
-                            onReset={resetAttempt}
-                            onLogin={index < (MIN_CHALLENGES-1) ? undefined : onLogin}/>
-                    )})
+                    (challenge?.image_sets ?? []).map((imageSet, index) => {
+                        return (
+                            <ChallengeSlide
+                                key={`auth__login__challenge_${index}`}
+                                index={index}
+                                total={challenge?.image_sets.length ?? 0}
+                                imageSet={imageSet}
+                                selections={selections}
+                                selection={selections[index]}
+                                onSelect={(image) => selectImage(index, image)}
+                                onNext={() => onNext(index)}
+                                onReset={resetAttempt}
+                                onLogin={index >= (MIN_ANSWERS - 1) ? () => onLogin(index) : undefined} />
+                        )
+                    })
                 }
-                </ React.Fragment>
+            </ React.Fragment>
 
-            </Carousel>
+        </Carousel>
     )
 }
 
-
 export default Login;
-

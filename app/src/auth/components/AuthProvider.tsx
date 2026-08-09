@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
     user : User | null;
     token : string | null;
-    signIn : (email:string, images: string[]) => Promise<void>;
+    signIn : (email: string, challengeUid: string, images: string[]) => Promise<void>;
     signOut : (callback:VoidFunction) => void;
 }
 
@@ -30,8 +30,8 @@ export  function AuthProvider (props : props)  {
 
     if (token && !user) useToken(token);
 
-    async function signIn (email : string, images : string []){
-        const token = await api.signIn(email, images);
+    async function signIn (email : string, challengeUid : string, images : string []){
+        const token = await api.signIn(email, challengeUid, images);
         await useToken(token);
     }
     

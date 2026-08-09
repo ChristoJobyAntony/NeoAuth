@@ -1,53 +1,42 @@
 import React from "react";
-import { deepOrange, purple} from '@mui/material/colors';
-import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SnackbarProvider } from 'notistack';
 
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/ibm-plex-sans/700.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+
+import theme from "./theme";
 import Auth from "./auth/Auth";
-import {AuthProvider} from "./auth/components/AuthProvider";
+import { AuthProvider } from "./auth/components/AuthProvider";
 import { NavBar } from "./components/NavBar";
 import Landing from "./Landing"
 import Dash from "./dash/Dash";
 import RequireAuth from "./auth/components/RequireAuth";
 
-let theme = createTheme({
-    palette: {
-      primary: {
-          light: purple['100'],
-          main : purple['600'],
-        },
-      secondary: {
-          main : deepOrange['400']
-        } 
-    },
-    typography:{
-        fontFamily : ['Roboto', '"Helvetica Neue"'].join(", ") ,
-        h4: { fontWeight: 500 },
-        h5: { fontWeight : 500, textAlign: "center" },
-        h6: { textAlign: "center"}
-    }
-  })
-
-theme = responsiveFontSizes(theme);
-
 const App = () => {
     return (
         <BrowserRouter basename="/">
             <ThemeProvider theme={theme}>
+                <CssBaseline />
                 <AuthProvider>
-                    <SnackbarProvider autoHideDuration={2000} >
-                        <NavBar/>
+                    <SnackbarProvider autoHideDuration={2500}>
+                        <NavBar />
                         <Routes>
-                            <Route index element={<Landing/>} />
-                            <Route path="auth/*" element={<Auth rows={4} columns={4}/>}/>
-                            <Route 
-                                path="dash/*" 
+                            <Route index element={<Landing />} />
+                            <Route path="auth/*" element={<Auth />} />
+                            <Route
+                                path="dash/*"
                                 element={
                                     <RequireAuth>
-                                        <Dash/>
+                                        <Dash />
                                     </RequireAuth>
-                                }/>
+                                } />
                         </Routes>
                     </SnackbarProvider>
                 </AuthProvider>

@@ -1,15 +1,20 @@
 import React from "react";
-import { Avatar, Box, Button, Card, Grid, Typography } from "@mui/material";
+import { Avatar, Box, Card, Grid, Typography } from "@mui/material";
 import LinkIcon from '@mui/icons-material/Link';
 import InfoIcon from '@mui/icons-material/Info';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 import { useAuth } from "../auth/components/AuthProvider";
-import { display } from "@mui/system";
+import { tokens } from "../theme";
 
+const cards = [
+    { icon: <InfoIcon color="primary" fontSize="large" />, title: "Your personal information" },
+    { icon: <LinkIcon color="primary" fontSize="large" />, title: "Linked applications" },
+    { icon: <AnalyticsIcon color="primary" fontSize="large" />, title: "Account activity" },
+]
 
-function Dash () {
-    const {user} = useAuth();
+function Dash() {
+    const { user } = useAuth();
     return (
         <Box
             sx={{
@@ -18,145 +23,60 @@ function Dash () {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor:"primary.light",
-                paddingInline: "10px",
+                backgroundColor: "background.default",
+                paddingInline: "16px",
             }}>
-            
-            <Grid 
-                container 
-                spacing={2}
-                maxWidth='md'>
-                {/* The title card */}
-                <Grid 
-                    item 
-                    xs={12}>
-                   <Card
-                        raised>
-                       <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "stretch",
-                                height: "20vh",
-                            }}>
-                            <div
-                                style={{
-                                    flex: "1 0",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center"
+
+            <Grid container spacing={2} maxWidth='md'>
+                <Grid item xs={12}>
+                    <Card>
+                        <Box sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "22px",
+                            padding: "28px",
+                        }}>
+                            <Avatar
+                                sx={{
+                                    height: 64,
+                                    width: 64,
+                                    backgroundColor: tokens.cobalt,
+                                    fontWeight: 600,
+                                    fontSize: 26,
                                 }}>
-                                    <Avatar
-                                        sx={{
-                                            height: "50%",
-                                            width: "auto",
-                                            aspectRatio : "1",
-                                            backgroundColor: "primary.dark"
-                                        }}> 
-                                        <Typography 
-                                            variant="h4"
-                                            whiteSpace="normal">
-                                            {user?.name.slice(0, 1)} 
-                                        </Typography>
-                                    </Avatar>
+                                {user?.name.slice(0, 1)}
+                            </Avatar>
+                            <div>
+                                <Typography variant="overline">
+                                    Signed in with a NeoPass
+                                </Typography>
+                                <Typography variant="h5" textAlign="left">
+                                    Welcome back, {user?.name}
+                                </Typography>
                             </div>
-
-                            <div
-                                style={{
-                                    flex: "3 0",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                }}>
-                                    <Typography
-                                        variant="h5"
-                                        textAlign="left">
-                                        Hey there {user?.name} 👋,<br/>
-                                        Welcome to Your Privacy Dashboard
-                                    </Typography>
-                            </div>
-
-
-                       </div>
-                    </Card> 
+                        </Box>
+                    </Card>
                 </Grid>
 
-                <Grid
-                    item 
-                    xs={6}
-                    lg={4}>
-                    <Card
-                        raised>
-                        <div
-                            style={{
-                                height:"30vh",
+                {cards.map((card) => (
+                    <Grid item xs={12} sm={4} key={card.title}>
+                        <Card>
+                            <Box sx={{
+                                height: "22vh",
                                 display: "flex",
                                 flexDirection: "column",
-                                justifyContent: "space-evenly",
-                                alignItems : "center",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "14px",
                             }}>
-                            <InfoIcon 
-                                color="primary"
-                                fontSize="large"/>
-                                <Typography
-                                    variant="h6">
-                                        Your personal information
+                                {card.icon}
+                                <Typography variant="h6" textAlign="center">
+                                    {card.title}
                                 </Typography>
-                        </div>
-                    </Card>                        
-                </Grid>
-
-                <Grid
-                    item 
-                    xs={6}
-                    lg={4}>
-                    <Card
-                        raised>
-                        <div
-                            style={{
-                                height:"30vh",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-evenly",
-                                alignItems : "center",
-                            }}>
-                            <LinkIcon
-                                color="primary"
-                                fontSize="large"/>
-                                <Typography
-                                    variant="h6">
-                                        View Linked Applications
-                                </Typography>
-                        </div>
-                    </Card>                        
-                </Grid>
-
-
-
-                <Grid
-                    item 
-                    xs={6}
-                    lg={4}>
-                    <Card
-                        raised>
-                        <div
-                            style={{
-                                height:"30vh",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-evenly",
-                                alignItems : "center",
-                            }}>
-                            <AnalyticsIcon
-                                color="primary"
-                                fontSize="large"/>
-                                <Typography
-                                    variant="h6">
-                                    Account Activity
-                                </Typography>
-                        </div>
-                    </Card>                        
-                </Grid>
+                            </Box>
+                        </Card>
+                    </Grid>
+                ))}
             </Grid>
         </Box>
     )

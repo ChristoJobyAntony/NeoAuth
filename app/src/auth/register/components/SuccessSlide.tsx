@@ -1,79 +1,48 @@
 import { Button, Typography } from "@mui/material";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import React from "react";
 
 import { CarouselItem } from "../../../components/Carousel";
-import { useSnackbar } from "notistack";
 
-
-function SuccessSlide () {
+function SuccessSlide() {
     const navigate = useNavigate();
-    const {enqueueSnackbar} = useSnackbar();
 
     return (
         <CarouselItem width="100%">
             <div
-            style={{
-                width:"100%",
-                height:"100%",
-                display:"flex",
-                flexDirection: "column",
-                justifyContent: "space-evenly", 
-                alignItems: "center",
-            }}>
-                
-                <div 
                 style={{
-                    flex: "0 0",
-                    padding: "20px"
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-evenly",
+                    alignItems: "center",
                 }}>
-                    <Typography variant="h5" align="center" whiteSpace="normal">
-                        Great Job 🎉 🥳, Your all done 👍
-                    </Typography>
-
-                </div>
 
                 <div
                     style={{
-                        flex: "2 0",
-                        width:"90%",
+                        width: "80%",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        justifyContent: "space-evenly"
+                        gap: "18px",
                     }}>
-
-                        <CheckCircleOutlineOutlinedIcon fontSize="large" color="success"/>
-                        <Typography variant="h6" whiteSpace='normal' textAlign='center'>
-                            You have been successfully registered with NeoAuth <SecurityOutlinedIcon/>. <br/>
-                            Welcome to the future of secure and effortless authentication.
-                        </Typography>
-
-                    
-                </div>
-                    
-                <div
-                    style={{
-                        flex: "1 0",
-                        width: "90%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}>
-                    
-                    <Button
-                        variant="outlined"
-                        onClick={()=>{
-                            enqueueSnackbar('Login using your the credentials you created', {variant : "info"});
-                            navigate('/auth')
-                        }}>
-                        Login to you account
-                    </Button>
+                    <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 56 }} color="success" />
+                    <Typography variant="h4" whiteSpace='normal' textAlign='center'>
+                        Your NeoPass is ready
+                    </Typography>
+                    <Typography variant="body1" whiteSpace='normal' textAlign='center' color="text.secondary">
+                        Remember your objects and their order — that sequence is now your only password.
+                    </Typography>
                 </div>
 
-
+                <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => navigate('/auth')}>
+                    Sign in with your NeoPass
+                </Button>
             </div>
         </CarouselItem>
     )

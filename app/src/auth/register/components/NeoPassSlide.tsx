@@ -1,150 +1,184 @@
-import { Button, Card, Step, StepLabel, Stepper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, ButtonBase, Card, TextField, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import React, { useState } from "react";
 import { CarouselItem } from "../../../components/Carousel";
 import api from "../../api";
 import { _Object } from "../../types";
+import { mono, tokens } from "../../../theme";
 
 type props = {
-    prompt?: string,
-    objects : _Object[],
+    step: number,
+    prompt: string,
+    hint: string,
+    objects: _Object[],
     onPrev: () => void,
-    onNext : (objects : _Object[]) => void,
+    onNext: (objects: _Object[]) => void,
 };
 
 const MAX_OBJECTS = 8;
-const MIN_OBJECTS = 4;
-const defaultSelectedObjects = [undefined, undefined, undefined, undefined];
+const MIN_OBJECTS = 6;
 
-function NeoPassSlide ( {prompt, objects, onPrev, onNext} : props ) {
-    const [selectedObjects, setSelectedObjects] = useState<(_Object|undefined)[]>(defaultSelectedObjects);
-    const [objectCounter, setObjectCounter] = useState<number>(0);
-    const {enqueueSnackbar} = useSnackbar();
+// The sequence tray: numbered slots that fill with the chosen objects, in
+// order — the ordered sequence IS the NeoPass.
+function SequenceTray({ selected }: { selected: _Object[] }) {
+    return (
+        <Box sx={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap" }}>
+            {Array.from({ length: MAX_OBJECTS }, (_, i) => {
+                const obj = selected[i];
+                const optional = i >= MIN_OBJECTS;
+                return (
+                    <Box
+                        key={`tray_slot_${i}`}
+                        title={obj ? `${i + 1}. ${obj.name}` : undefined}
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "9px",
+                            border: obj ? `2px solid ${tokens.cobalt}` : `1px ${optional ? "dotted" : "dashed"} ${tokens.line}`,
+                            backgroundColor: tokens.card,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontFamily: mono,
+                            fontSize: 12,
+                            color: tokens.inkSoft,
+                        }}>
+                        {obj
+                            ? <img src={api.getObject(obj.uid)} width="28" height="28" alt={obj.name} />
+                            : i + 1}
+                    </Box>
+                )
+            })}
+        </Box>
+    )
+}
 
-    async function onSelectObject (obj : _Object) {
-        if (objectCounter+1 === MAX_OBJECTS) return enqueueSnackbar(`You can only select upto ${MAX_OBJECTS} `, {variant : "error"})
-        const update = selectedObjects.slice();
-        update[objectCounter] = obj;
-        setSelectedObjects(update);
-        setObjectCounter(objectCounter+1);
-    }
+function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
+    const [selected, setSelected] = useState<_Object[]>([]);
+    const [query, setQuery] = useState("");
+    const { enqueueSnackbar } = useSnackbar();
 
-    async function resetObjectSelection () {
-        setSelectedObjects(defaultSelectedObjects);
-        setObjectCounter(0);
-    }
+    const visible = objects.filter((obj) => obj.name.toLowerCase().includes(query.toLowerCase()));
 
-    function next () {
-        const objects = [];
-        for (const obj of selectedObjects) {
-            if (obj) objects.push(obj);
+    function onSelectObject(obj: _Object) {
+        if (selected.some((s) => s.uid === obj.uid)) return;
+        if (selected.length >= MAX_OBJECTS) {
+            return enqueueSnackbar(`A NeoPass holds at most ${MAX_OBJECTS} objects`, { variant: "error" })
         }
-        onNext(objects);
-        resetObjectSelection();
+        setSelected([...selected, obj]);
+    }
+
+    function reset() {
+        setSelected([]);
+        setQuery("");
+    }
+
+    function next() {
+        const chosen = selected.slice();
+        onNext(chosen);
+        reset();
     }
 
     return (
-    <CarouselItem width="100%">
-        <div
-        style={{
-            width : "100%",
-            height: "100%",
-            display : "flex",
-            flexDirection: "column",
-            justifyContent: "space-evenly",
-            alignItems: "center",
-        }}>
-            
+        <CarouselItem width="100%">
             <div
-            style={{
-                flex: "0 0",
-                padding: "20px",
-                display: "flex"
-            }}>
-                    <Typography variant="h5">
-                        {prompt}
-                    </Typography>
-            </div>
-
-            <Card
-            sx={{
-                flex:"4 0",
-                width:"95%",
-                overflowY:"scroll",
-                scrollbarWidth: "thin",
-                display: "grid",
-                gridTemplateColumns: "auto auto auto auto auto",
-                rowGap: "5px",
-                columnGap: "5px",
-                border : '2px solid',
-                borderColor : 'primary.main',
-                padding:"5px",
-            }}>
-                
-                {
-                    objects.map((obj, j)=>
-                        <Tooltip 
-                        title={obj.name}
-                        key={`auth__register__tooltip__object_${j}`}>
-                            <Button
-                            variant="outlined"
-                            onClick={(_)=>onSelectObject(obj)}
-                            disabled={selectedObjects[objectCounter-1]?.uid === obj.uid }>
-                                <img
-                                width="100%"
-                                src={api.getObject(obj.uid)} 
-                                alt={obj.name} 
-                                />
-                            </Button>
-                        </Tooltip>
-                    )
-                }
-
-            </Card>
-
-            <div
-            style={{
-                flex : "1 0",
-                padding: "10px",
-                width: "95%",
-            }}>
-                <Stepper activeStep={objectCounter} alternativeLabel>
-                    {selectedObjects.map((obj, i) => (
-                        <Step key={`auth__register__stepper_step_${i}`}>
-                            <StepLabel>{obj ? obj.name : `Object ${i+1}` }</StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
-            </div>
-
-            <div
-            style={{
-                flex : "1 0",
-                padding : "10px",
-                display : "flex",
-                justifyContent : "space-between",
-                width : "90%",
-            }}>
-                <Button
-                onClick={() => {
-                    resetObjectSelection();
-                    onPrev();
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "18px 0 14px",
+                    boxSizing: "border-box",
                 }}>
-                    Back
-                </Button>
-                <Button
-                disabled={objectCounter == 0 }
-                onClick={()=> resetObjectSelection()}>
-                    Reset
-                </Button>
-                <Button
-                disabled={objectCounter < MIN_OBJECTS}
-                onClick={next}>
-                    Next
-                </Button>
+
+                <div style={{ textAlign: "center" }}>
+                    <Typography variant="overline">Create account — step {step} of 6</Typography>
+                    <Typography variant="h5" sx={{ whiteSpace: "normal", px: 2 }}>{prompt}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: "normal", px: 3, mt: 0.5 }}>{hint}</Typography>
+                </div>
+
+                <TextField
+                    size="small"
+                    placeholder="Search objects"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    sx={{ width: "min(60%, 320px)" }} />
+
+                <Card
+                    sx={{
+                        width: "92%",
+                        flex: "1 1 0",
+                        minHeight: 0,
+                        overflowY: "auto",
+                        scrollbarWidth: "thin",
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fill, minmax(86px, 1fr))",
+                        gap: "6px",
+                        padding: "10px",
+                        boxSizing: "border-box",
+                        alignContent: "start",
+                    }}>
+                    {
+                        visible.map((obj) => {
+                            const isPicked = selected.some((s) => s.uid === obj.uid);
+                            return (
+                                <ButtonBase
+                                    key={`register_object_${obj.uid}`}
+                                    focusRipple
+                                    disabled={isPicked}
+                                    onClick={(_) => onSelectObject(obj)}
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "4px",
+                                        padding: "8px 4px",
+                                        borderRadius: "9px",
+                                        border: `1px solid ${isPicked ? tokens.cobalt : tokens.line}`,
+                                        opacity: isPicked ? 0.35 : 1,
+                                        backgroundColor: tokens.card,
+                                        transition: "border-color 120ms ease",
+                                        "&:hover": { borderColor: tokens.cobalt },
+                                    }}>
+                                    <img width="40" height="40" src={api.getObject(obj.uid)} alt={obj.name} />
+                                    <Typography variant="caption" sx={{ fontFamily: mono, color: tokens.inkSoft }}>
+                                        {obj.name}
+                                    </Typography>
+                                </ButtonBase>
+                            )
+                        })
+                    }
+                </Card>
+
+                <SequenceTray selected={selected} />
+
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        width: "90%",
+                    }}>
+                    <Button variant="text" onClick={() => { reset(); onPrev(); }}>
+                        Back
+                    </Button>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                        <Button
+                            variant="text"
+                            disabled={selected.length === 0}
+                            onClick={() => setSelected(selected.slice(0, -1))}>
+                            Undo
+                        </Button>
+                        <Button
+                            variant="contained"
+                            disabled={selected.length < MIN_OBJECTS}
+                            onClick={next}>
+                            Continue
+                        </Button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </CarouselItem>)
+        </CarouselItem>)
 }
 
 export default NeoPassSlide;

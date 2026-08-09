@@ -1,17 +1,12 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import  Register from "./register/Register";
+import { Box, Grid } from "@mui/material";
+
+import Register from "./register/Register";
 import Login from "./login/Login";
-import {Box, Grid} from "@mui/material";
-import { height } from "@mui/system";
 
-type props = {
-    rows : number,
-    columns : number
-}
+const Auth = () => {
 
-const Auth = (props : props) => {
-    
     return (
         <Box
             sx={{
@@ -20,27 +15,29 @@ const Auth = (props : props) => {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                backgroundColor:"primary.light",
+                backgroundColor: "background.default",
                 overflow: "hidden",
             }}>
-                <Grid 
-                container 
-                justifyContent="center" 
+            <Grid
+                container
+                justifyContent="center"
                 sx={{
-                    height:"80%", 
-                    width:"100%",
-                    paddingLeft: "20px",
-                    paddingRight: "20px"
+                    height: { xs: "94%", md: "88%" },
+                    width: "100%",
+                    paddingLeft: "16px",
+                    paddingRight: "16px",
                 }}>
-                <Grid 
-                    item 
-                    xs={12} 
-                    md={6} 
+                <Grid
+                    item
+                    xs={12}
+                    sm={10}
+                    md={7}
+                    lg={6}
                     maxHeight="100%"
                 >
                     <Routes>
-                        <Route index  element={<Login/>}/>
-                        <Route path="register" element={<Register/>}/>
+                        <Route index element={<Login />} />
+                        <Route path="register" element={<Register />} />
                     </Routes>
                 </Grid>
             </Grid>

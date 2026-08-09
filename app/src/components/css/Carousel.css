@@ -1,23 +1,22 @@
 .carousel {
-    overflow:  hidden;
+    overflow: hidden;
     height: 100%;
-    box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border: 1px solid #DCDFE4;
+    box-shadow: 0 12px 32px -18px rgba(27, 33, 48, 0.25);
 }
 
 .inner {
     white-space: nowrap;
-    transition: transform 0.3s;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
     width: 100%;
 }
-
 
 .carousel-item {
     display: inline-block;
     height: 100%;
     vertical-align: top;
-    background-color: white;
-    /* border-radius: 10px; */
+    background-color: #FFFFFF;
 }
 
 .carousel-item .MuiTypography-root {

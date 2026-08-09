@@ -1,96 +1,78 @@
-import { Details } from "@mui/icons-material";
-import { TextField, Typography, Button} from "@mui/material";
 import React from "react";
+import { Button, TextField, Typography } from "@mui/material";
+
 import { CarouselItem } from "../../../components/Carousel";
 import { Form } from "../../types";
 
 type props = {
-    nameField : Form,
-    setNameField : React.Dispatch<React.SetStateAction<Form>>,
-    onPrev : () => void,
-    onNext : () => void,
-
+    nameField: Form,
+    setNameField: React.Dispatch<React.SetStateAction<Form>>,
+    onPrev: () => void,
+    onNext: () => void,
 }
-function DetailsSlide ({nameField, setNameField, onPrev, onNext} : props) {
-    
-    function updateNameField (field : Partial<Form>) {
-        setNameField({...nameField, ...field})
+
+function DetailsSlide({ nameField, setNameField, onPrev, onNext }: props) {
+
+    function updateNameField(field: Partial<Form>) {
+        setNameField({ ...nameField, ...field })
     }
-    function onNameInput ( ) {
-        if (Boolean(!nameField.value)) return updateNameField({helperText:"Textfield is empty", error: true});
-        else updateNameField({helperText : "", error: false});
+
+    function onNameInput() {
+        if (!nameField.value) return updateNameField({ helperText: "Enter a name", error: true });
+        updateNameField({ helperText: "", error: false });
         onNext();
     }
-    
+
     return (
-    <CarouselItem width="100%">
-        <div
-            style={{
-                width:"100%",
-                height:"100%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-around",
-                alignItems: "center"
-            }}
-        >
-            <div 
-                style={{
-                    flexGrow: 1,
-                    padding: "20px"
-                }}>
-                <Typography variant="h4" align="center">
-                    Lets sort out some of the specifics 📋
-                </Typography>
-
-            </div>
-
+        <CarouselItem width="100%">
             <div
                 style={{
-                    flexGrow: 3,
-                    width:"70%"
-                }}
-            >
-                <Typography variant="subtitle1">
-                    What should we call you ? 🤔
-                </Typography>
-                <br/>
-                <TextField
-                    required
-                    id="auth__register__text_field_name"
-                    label="Name"
-                    variant="outlined"
-                    value={nameField.value}
-                    helperText={nameField.helperText}
-                    error={nameField.error}
-                    onChange={(e)=>{updateNameField({value: e.target.value})}}
-                    style={{width:"100%"}}/>
-            </div>
-
-            <div
-                style={{
-                    flexGrow: 1,
-                    width: "90%",
+                    width: "100%",
+                    height: "100%",
                     display: "flex",
-                    justifyContent: "space-between",
+                    flexDirection: "column",
+                    justifyContent: "space-evenly",
                     alignItems: "center",
                 }}>
-                
-                <Button
-                    variant="outlined"
-                    onClick={onPrev}>
-                    Back
-                </Button>
+                <div style={{ textAlign: "center", padding: "20px" }}>
+                    <Typography variant="overline">
+                        Create account — step 2 of 6
+                    </Typography>
+                    <Typography variant="h4" align="center">
+                        What should we call you?
+                    </Typography>
+                </div>
 
-                <Button
-                    variant="outlined"
-                    onClick={onNameInput}>
-                    Next
-                </Button>
+                <div style={{ width: "70%" }}>
+                    <TextField
+                        required
+                        id="auth__register__text_field_name"
+                        label="Name"
+                        variant="outlined"
+                        value={nameField.value}
+                        helperText={nameField.helperText}
+                        error={nameField.error}
+                        onKeyDown={(e) => { if (e.key === "Enter") onNameInput() }}
+                        onChange={(e) => { updateNameField({ value: e.target.value }) }}
+                        style={{ width: "100%" }} />
+                </div>
+
+                <div
+                    style={{
+                        width: "90%",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}>
+                    <Button variant="text" onClick={onPrev}>
+                        Back
+                    </Button>
+                    <Button variant="contained" onClick={onNameInput}>
+                        Continue
+                    </Button>
+                </div>
             </div>
-
-        </div>
-    </CarouselItem>
+        </CarouselItem>
     )
 }
 
