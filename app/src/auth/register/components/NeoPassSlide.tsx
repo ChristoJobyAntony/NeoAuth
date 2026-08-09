@@ -91,8 +91,7 @@ function NeoPassSlide ( {prompt, objects, onPrev, onNext} : props ) {
                             onClick={(_)=>onSelectObject(obj)}
                             disabled={selectedObjects[objectCounter-1]?.uid === obj.uid }>
                                 <img
-                                placeholder="http://placehold.jp/200x200.png"
-                                width="100%" 
+                                width="100%"
                                 src={api.getObject(obj.uid)} 
                                 alt={obj.name} 
                                 />
