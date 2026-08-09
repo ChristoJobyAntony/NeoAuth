@@ -8,7 +8,9 @@ module.exports = {
   entry: './src/index.tsx',
   output: {
     path: __dirname + '/build/',
-    publicPath: "/"
+    publicPath: "/",
+    filename: prod ? '[name].[contenthash].js' : '[name].js',
+    clean: true,
   },
   module: {
     rules: [
@@ -35,6 +37,8 @@ module.exports = {
       template: './public/index.html',
       publicPath: '/'
     }),
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: prod ? '[name].[contenthash].css' : '[name].css',
+    }),
   ],
 };
