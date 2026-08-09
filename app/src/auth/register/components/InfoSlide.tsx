@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import React from "react";
 import { CarouselItem } from "../../../components/Carousel";
-import { mono, tokens } from "../../../theme";
+import { tokens } from "../../../theme";
 
 type props = {
     onNext: () => void,
@@ -40,7 +40,7 @@ function InfoSlide({ onPrev, onNext }: props) {
                 <Box sx={{ width: "84%", display: "flex", flexDirection: "column", gap: "12px" }}>
                     {RULES.map((rule, i) => (
                         <Box key={`rule_${i}`} sx={{ display: "flex", gap: "14px", alignItems: "baseline" }}>
-                            <Typography sx={{ fontFamily: mono, color: tokens.cobalt, fontSize: 13 }}>
+                            <Typography sx={{ color: tokens.cobalt, fontSize: 13 }}>
                                 {String(i + 1).padStart(2, "0")}
                             </Typography>
                             <Typography variant="body1" whiteSpace="normal">

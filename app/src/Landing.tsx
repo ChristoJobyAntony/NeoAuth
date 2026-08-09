@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import api from "./auth/api";
 import { useAuth } from "./auth/components/AuthProvider";
 import { _Object } from "./auth/types";
-import { mono, tokens } from "./theme";
+import { tokens } from "./theme";
 
 // The hero states the thesis and shows the material: the object vocabulary
 // itself, straight from the server.
@@ -83,7 +83,7 @@ const Landing = () => {
                     </Button>}
             </Box>
 
-            <Typography sx={{ fontFamily: mono, fontSize: 11, color: tokens.inkSoft, letterSpacing: "0.06em" }}>
+            <Typography sx={{ fontSize: 11, color: tokens.inkSoft, letterSpacing: "0.06em" }}>
                 COMP4500 RESEARCH PROTOTYPE · ANU · ANONYMOUS TIMING DATA RECORDED FOR EVALUATION
             </Typography>
         </Box>

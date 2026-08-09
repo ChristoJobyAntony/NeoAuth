@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from "notistack";
 
 import { useAuth } from "../auth/components/AuthProvider";
-import { mono, tokens } from "../theme";
+import { tokens } from "../theme";
 
 type NavLink = {
   name: string,
@@ -84,7 +84,6 @@ export function NavBar() {
           </Button>
           <Typography
             sx={{
-              fontFamily: mono,
               fontSize: 11,
               letterSpacing: "0.12em",
               color: tokens.inkSoft,

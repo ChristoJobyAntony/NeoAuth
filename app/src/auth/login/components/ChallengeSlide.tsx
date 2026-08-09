@@ -4,7 +4,7 @@ import { CarouselItem } from "../../../components/Carousel";
 import ImageButton from "./ImageButton";
 import { Image, ImageSet } from "../../types";
 import { getImageUrl } from "../../api";
-import { mono, tokens } from "../../../theme";
+import { tokens } from "../../../theme";
 
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
 const DIMENSION = 4;
@@ -39,7 +39,6 @@ function SequenceTray({ selections, current }: { selections: (Image | undefined)
                         alignItems: "center",
                         justifyContent: "center",
                         overflow: "hidden",
-                        fontFamily: mono,
                         fontSize: 12,
                         color: tokens.inkSoft,
                     }}>

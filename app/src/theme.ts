@@ -13,8 +13,9 @@ export const tokens = {
     success: '#177B4B',
 }
 
-export const mono = '"IBM Plex Mono", "SFMono-Regular", Consolas, monospace'
-const sans = '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif'
+// One typeface for the whole site: IBM Plex Serif carries display, body and
+// the small protocol labels alike.
+export const serif = '"IBM Plex Serif", Georgia, "Times New Roman", serif'
 
 let theme = createTheme({
     palette: {
@@ -27,15 +28,14 @@ let theme = createTheme({
     },
     shape: { borderRadius: 10 },
     typography: {
-        fontFamily: sans,
-        h3: { fontWeight: 650, letterSpacing: '-0.03em', lineHeight: 1.1 },
-        h4: { fontWeight: 650, letterSpacing: '-0.02em' },
-        h5: { fontWeight: 600, letterSpacing: '-0.01em' },
+        fontFamily: serif,
+        h3: { fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.15 },
+        h4: { fontWeight: 600, letterSpacing: '-0.01em' },
+        h5: { fontWeight: 600 },
         h6: { fontWeight: 600 },
         subtitle1: { color: tokens.inkSoft },
         body2: { color: tokens.inkSoft },
         overline: {
-            fontFamily: mono,
             fontWeight: 500,
             letterSpacing: '0.14em',
             color: tokens.inkSoft,
@@ -71,7 +71,7 @@ let theme = createTheme({
         MuiTextField: { defaultProps: { size: 'medium' } },
         MuiTooltip: {
             styleOverrides: {
-                tooltip: { fontFamily: mono, fontSize: 12 },
+                tooltip: { fontSize: 12 },
             },
         },
     },

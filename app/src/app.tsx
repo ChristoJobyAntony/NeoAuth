@@ -4,12 +4,10 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SnackbarProvider } from 'notistack';
 
-import '@fontsource/ibm-plex-sans/400.css';
-import '@fontsource/ibm-plex-sans/500.css';
-import '@fontsource/ibm-plex-sans/600.css';
-import '@fontsource/ibm-plex-sans/700.css';
-import '@fontsource/ibm-plex-mono/400.css';
-import '@fontsource/ibm-plex-mono/500.css';
+import '@fontsource/ibm-plex-serif/400.css';
+import '@fontsource/ibm-plex-serif/500.css';
+import '@fontsource/ibm-plex-serif/600.css';
+import '@fontsource/ibm-plex-serif/700.css';
 
 import theme from "./theme";
 import Auth from "./auth/Auth";

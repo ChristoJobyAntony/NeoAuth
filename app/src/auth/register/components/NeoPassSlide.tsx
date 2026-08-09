@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { CarouselItem } from "../../../components/Carousel";
 import api from "../../api";
 import { _Object } from "../../types";
-import { mono, tokens } from "../../../theme";
+import { tokens } from "../../../theme";
 
 type props = {
     step: number,
@@ -39,7 +39,6 @@ function SequenceTray({ selected }: { selected: _Object[] }) {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            fontFamily: mono,
                             fontSize: 12,
                             color: tokens.inkSoft,
                         }}>
@@ -135,7 +134,7 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
                                         "&:hover": { borderColor: tokens.cobalt },
                                     }}>
                                     <img width="40" height="40" src={api.getObject(obj.uid)} alt={obj.name} />
-                                    <Typography variant="caption" sx={{ fontFamily: mono, color: tokens.inkSoft }}>
+                                    <Typography variant="caption" sx={{ color: tokens.inkSoft }}>
                                         {obj.name}
                                     </Typography>
                                 </ButtonBase>
