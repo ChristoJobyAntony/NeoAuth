@@ -1,6 +1,25 @@
 # NeoAuth
 
-A graphical authentication system based on cognimetrics, built on the principle of using arbitrary objects instead of text as the "pass-phrase". Instead of typing a password, users pick 4–8 objects (an apple, a rocket, …) and later authenticate by spotting their objects inside randomly composited challenge images.
+A graphical authentication system based on cognimetrics, built on the principle of using arbitrary objects instead of text as the "pass-phrase". Instead of typing a password, users pick an ordered sequence of 6–8 objects (an apple, a rocket, …) and later authenticate by spotting each object inside randomly composited challenge images. Reference implementation of the COMP4500 research proposal (`COMP4500___Research_Proposal.pdf`).
+
+## Scheme parameters (per the proposal, §4.1)
+
+- **48 objects**, each an easily recognisable everyday graphic
+- **NeoPass**: an ordered sequence of **6–8 distinct objects** (enforced server-side)
+- **Images**: exactly **3 objects** each, composited with rotation, scale and skew
+- **Image sets**: 16 images partitioning all 48 objects exactly once
+- **Challenges**: server-issued, **single-use**, 5-minute expiry, 8 image sets each, bound to one account — observed selections cannot be replayed
+- **Secret storage**: peppered HMAC-SHA256 (`HASH_PEPPER`, kept outside the DB) wrapped in Argon2id — a leaked database is uncrackable without the server environment
+
+## Research metrics
+
+The frontend records anonymous timing events (registration duration, per-challenge answer times, sign-in outcomes) under a random session id — no account identifiers. Export them with:
+
+```sh
+curl -H "Authorization: Bearer $METRICS_TOKEN" https://<host>/api/metrics/export
+```
+
+Set `METRICS_TOKEN` in `.env` to enable the export endpoint.
 
 ## The Stack
 
@@ -21,7 +40,7 @@ cloudflared ──> nginx (web) ──> static SPA
 
 ```sh
 cp .env.example .env
-# fill in MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD and JWT_SECRET_KEY
+# fill in MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD, JWT_SECRET_KEY and HASH_PEPPER
 # (generate secrets with: openssl rand -hex 32)
 
 docker compose up --build -d
