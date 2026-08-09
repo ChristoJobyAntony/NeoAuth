@@ -9,19 +9,17 @@ type StepDef = {
 }
 
 const steps: StepDef[] = [
-    { label: "Email address", slide: 0 },
-    { label: "Your name", slide: 1 },
-    { label: "Secret object sequence", slide: 3 },
-    { label: "Create account", slide: 5 },
+    { label: "Email address and name", slide: 0 },
+    { label: "Secret object sequence", slide: 1 },
+    { label: "Create account", slide: 3 },
 ]
 
 type props = {
     setSlide: React.Dispatch<React.SetStateAction<number>>,
     onNext: () => void,
-    onPrev: () => void,
 }
 
-function ReviewSlide({ setSlide, onNext, onPrev }: props) {
+function ReviewSlide({ setSlide, onNext }: props) {
     return (
         <CarouselItem width="100%">
             <div
@@ -34,10 +32,7 @@ function ReviewSlide({ setSlide, onNext, onPrev }: props) {
                     alignItems: "center",
                 }}>
 
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                    <Typography variant="overline">
-                        Create account — step 6 of 6
-                    </Typography>
+                <div style={{ textAlign: "center", padding: "10px 20px 0" }}>
                     <Typography variant="h4" align="center" whiteSpace="normal">
                         Review before you finish
                     </Typography>
@@ -53,7 +48,7 @@ function ReviewSlide({ setSlide, onNext, onPrev }: props) {
                         alignItems: "start",
                         justifyContent: "center"
                     }}>
-                    <Stepper activeStep={3} orientation="vertical">
+                    <Stepper activeStep={2} orientation="vertical">
                         {
                             steps.map(step =>
                                 <Step key={step.label}>

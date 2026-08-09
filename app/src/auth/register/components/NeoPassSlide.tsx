@@ -1,17 +1,19 @@
 import { Box, Button, ButtonBase, Card, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CarouselItem } from "../../../components/Carousel";
 import api from "../../api";
 import { _Object } from "../../types";
 import { tokens } from "../../../theme";
 
 type props = {
-    step: number,
+    mode: "choose" | "confirm",
     prompt: string,
     hint: string,
     objects: _Object[],
-    onPrev: () => void,
+    // confirm mode: auto-advance once this many objects are re-entered
+    targetLength?: number,
+    onCountChange: (count: number) => void,
     onNext: (objects: _Object[]) => void,
 };
 
@@ -19,31 +21,37 @@ const MAX_OBJECTS = 8;
 const MIN_OBJECTS = 6;
 
 // The sequence tray: numbered slots that fill with the chosen objects, in
-// order — the ordered sequence IS the NeoPass.
-function SequenceTray({ selected }: { selected: _Object[] }) {
+// order. During confirmation entries stay masked — the same way the real
+// sign-in never echoes them back.
+function SequenceTray({ selected, masked, slots }: { selected: _Object[], masked: boolean, slots: number }) {
     return (
         <Box sx={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap" }}>
-            {Array.from({ length: MAX_OBJECTS }, (_, i) => {
+            {Array.from({ length: slots }, (_, i) => {
                 const obj = selected[i];
                 const optional = i >= MIN_OBJECTS;
+                const isNext = !obj && i === selected.length;
                 return (
                     <Box
                         key={`tray_slot_${i}`}
-                        title={obj ? `${i + 1}. ${obj.name}` : undefined}
+                        title={obj && !masked ? `${i + 1}. ${obj.name}` : undefined}
                         sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: "9px",
-                            border: obj ? `2px solid ${tokens.accent}` : `1px ${optional ? "dotted" : "dashed"} ${tokens.line}`,
-                            backgroundColor: tokens.card,
+                            width: 44,
+                            height: 44,
+                            borderRadius: "10px",
+                            border: obj || isNext
+                                ? `2px solid ${tokens.accent}`
+                                : `1px ${optional ? "dotted" : "dashed"} ${tokens.lineStrong}`,
+                            backgroundColor: isNext ? tokens.accentWash : tokens.card,
+                            boxShadow: obj ? tokens.shadow1 : "none",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            fontSize: 12,
-                            color: tokens.inkSoft,
+                            fontSize: obj && masked ? 18 : 12,
+                            color: isNext ? tokens.accentDark : tokens.inkFaint,
+                            lineHeight: obj && !masked ? 0 : 1.4,
                         }}>
                         {obj
-                            ? <img src={api.getObject(obj.uid)} width="28" height="28" alt={obj.name} />
+                            ? (masked ? "•" : <img src={api.getObject(obj.uid)} width="30" height="30" alt={obj.name} />)
                             : i + 1}
                     </Box>
                 )
@@ -52,30 +60,44 @@ function SequenceTray({ selected }: { selected: _Object[] }) {
     )
 }
 
-function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
+function NeoPassSlide({ mode, prompt, hint, objects, targetLength, onCountChange, onNext }: props) {
     const [selected, setSelected] = useState<_Object[]>([]);
     const { enqueueSnackbar } = useSnackbar();
+
+    const confirming = mode === "confirm";
+    const slots = confirming ? (targetLength || MIN_OBJECTS) : MAX_OBJECTS;
+    const limit = confirming ? (targetLength || MAX_OBJECTS) : MAX_OBJECTS;
 
     // Alphabetical order makes objects quick to find again — especially when
     // repeating the sequence on the confirmation step.
     const visible = [...objects].sort((a, b) => a.name.localeCompare(b.name));
 
+    useEffect(() => { onCountChange(selected.length) }, [selected.length]);
+
+    // Confirmation auto-advances at the target length: the progress bar and
+    // tray carry the state, no Next button needed.
+    useEffect(() => {
+        if (confirming && targetLength && selected.length === targetLength) {
+            const timer = setTimeout(() => {
+                onNext(selected.slice());
+                setSelected([]);
+            }, 350);
+            return () => clearTimeout(timer);
+        }
+    }, [confirming, targetLength, selected]);
+
     function onSelectObject(obj: _Object) {
         if (selected.some((s) => s.uid === obj.uid)) return;
-        if (selected.length >= MAX_OBJECTS) {
+        if (selected.length >= limit) {
             return enqueueSnackbar(`A NeoPass holds at most ${MAX_OBJECTS} objects`, { variant: "error" })
         }
         setSelected([...selected, obj]);
     }
 
-    function reset() {
-        setSelected([]);
-    }
-
     function next() {
         const chosen = selected.slice();
         onNext(chosen);
-        reset();
+        setSelected([]);
     }
 
     return (
@@ -88,12 +110,11 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "18px 0 14px",
+                    padding: "6px 0 14px",
                     boxSizing: "border-box",
                 }}>
 
                 <div style={{ textAlign: "center" }}>
-                    <Typography variant="overline">Create account — step {step} of 6</Typography>
                     <Typography variant="h5" sx={{ whiteSpace: "normal", px: 2 }}>{prompt}</Typography>
                     <Typography variant="body2" sx={{ whiteSpace: "normal", px: 3, mt: 0.5 }}>{hint}</Typography>
                 </div>
@@ -111,6 +132,8 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
                         padding: "10px",
                         boxSizing: "border-box",
                         alignContent: "start",
+                        boxShadow: "none",
+                        border: `1px solid ${tokens.line}`,
                     }}>
                     {
                         visible.map((obj) => {
@@ -126,15 +149,16 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
                                         flexDirection: "column",
                                         gap: "4px",
                                         padding: "8px 4px",
-                                        borderRadius: "9px",
-                                        border: `1px solid ${isPicked ? tokens.accent : tokens.line}`,
-                                        opacity: isPicked ? 0.35 : 1,
-                                        backgroundColor: tokens.card,
-                                        transition: "border-color 120ms ease",
-                                        "&:hover": { borderColor: tokens.accent },
+                                        borderRadius: "10px",
+                                        border: "1px solid transparent",
+                                        opacity: isPicked ? 0.4 : 1,
+                                        backgroundColor: isPicked ? tokens.sunken : tokens.card,
+                                        boxShadow: isPicked ? "none" : tokens.shadow1,
+                                        transition: "border-color 120ms ease, box-shadow 120ms ease",
+                                        "&:hover": { borderColor: "#B7D8C9", boxShadow: tokens.shadow2 },
                                     }}>
                                     <img width="40" height="40" src={api.getObject(obj.uid)} alt={obj.name} />
-                                    <Typography variant="caption" sx={{ color: tokens.inkSoft }}>
+                                    <Typography variant="caption">
                                         {obj.name}
                                     </Typography>
                                 </ButtonBase>
@@ -143,31 +167,29 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
                     }
                 </Card>
 
-                <SequenceTray selected={selected} />
+                <SequenceTray selected={selected} masked={confirming} slots={slots} />
 
                 <div
                     style={{
                         display: "flex",
-                        justifyContent: "space-between",
+                        justifyContent: "center",
+                        gap: "10px",
                         width: "90%",
+                        minHeight: "38px",
                     }}>
-                    <Button variant="text" onClick={() => { reset(); onPrev(); }}>
-                        Back
+                    <Button
+                        variant="text"
+                        disabled={selected.length === 0}
+                        onClick={() => setSelected(selected.slice(0, -1))}>
+                        Undo
                     </Button>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <Button
-                            variant="text"
-                            disabled={selected.length === 0}
-                            onClick={() => setSelected(selected.slice(0, -1))}>
-                            Undo
-                        </Button>
+                    {!confirming &&
                         <Button
                             variant="contained"
                             disabled={selected.length < MIN_OBJECTS}
                             onClick={next}>
                             Continue
-                        </Button>
-                    </div>
+                        </Button>}
                 </div>
             </div>
         </CarouselItem>)

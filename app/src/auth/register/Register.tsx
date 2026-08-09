@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 
 import { Carousel } from "../../components/Carousel";
-import EmailSlide from "./components/EmailSlide";
-import DetailsSlide from "./components/DetailsSlide";
+import AccountSlide from "./components/AccountSlide";
 import NeoPassSlide from "./components/NeoPassSlide";
-import InfoSlide from "./components/InfoSlide";
+import RegisterProgress from "./components/RegisterProgress";
 import ReviewSlide from "./components/ReviewSlide";
 import SuccessSlide from "./components/SuccessSlide";
 import api from "../api";
@@ -14,6 +13,9 @@ import { logEvent, startTimer } from "../../metrics";
 
 const defaultTextField: Form = { value: "", error: false, helperText: "" };
 
+const STEPS = ["Account", "Choose objects", "Confirm", "Review"];
+// slide indices: 0 account, 1 choose, 2 confirm, 3 review, 4 success
+
 const Register = () => {
 
     let [slide, setSlide] = useState(0);
@@ -21,6 +23,7 @@ const Register = () => {
     const [nameField, setNameField] = useState(defaultTextField);
     const [emailField, setEmailField] = useState(defaultTextField);
     const [neoPass, setNeoPass] = useState<_Object[]>([]);
+    const [pickCount, setPickCount] = useState(0);
     const [registerTimer, setRegisterTimer] = useState<(() => number) | null>(null);
     const { enqueueSnackbar } = useSnackbar();
 
@@ -34,7 +37,7 @@ const Register = () => {
 
     function onNeoPassSelect(selectedObjects: _Object[]) {
         setNeoPass([...selectedObjects]);
-        nextSlide();
+        setSlide(2);
     }
 
     function onNeoPassConfirm(selectedObjects: _Object[]) {
@@ -42,11 +45,11 @@ const Register = () => {
 
         if (check.length === neoPass.length && !check.includes(false)) {
             enqueueSnackbar("Sequence confirmed", { variant: "success" });
-            return setSlide(5);
+            return setSlide(3);
         };
         logEvent("register_mismatch");
-        setSlide(3);
-        enqueueSnackbar("The sequences don't match — try selecting again", { variant: 'error' })
+        setSlide(1);
+        enqueueSnackbar("That wasn't the same sequence — try selecting again", { variant: 'error' })
     }
 
     async function registerUser() {
@@ -57,70 +60,80 @@ const Register = () => {
                 neoPass);
             if (registerTimer) logEvent("register_complete", registerTimer(), { length: neoPass.length });
             enqueueSnackbar("Account created", { variant: "success" })
-            setSlide(6);
+            setSlide(4);
         } catch (e) {
             enqueueSnackbar("Registration failed — please review your details", { variant: "error" })
         }
     }
 
-    function nextSlide() { setSlide(slide + 1) }
+    // Which progress segment is live, and the sub-label under the bar.
+    const progressStep = slide >= 4 ? STEPS.length : slide;
+    const progressDetail =
+        slide === 0 ? "Your details"
+            : slide === 1 ? (pickCount >= 8 ? "8 of 8 — continue" : `Object ${pickCount + 1} — pick 6 to 8`)
+                : slide === 2 ? `Object ${Math.min(pickCount + 1, neoPass.length)} of ${neoPass.length} — re-entering`
+                    : slide === 3 ? "Final check"
+                        : "Complete";
 
-    function prevSlide() { setSlide(slide - 1) }
-
+    // The progress bar is the back-navigation: completed segments jump.
+    function jumpTo(step: number) {
+        if (slide >= 4) return; // done — nothing to edit
+        setSlide(step);
+    }
 
     return (
-        <Carousel
-            activeIndex={slide}
-            style={{
-                height: "100%",
-                width: "100%",
-                borderRadius: "14px",
-            }}>
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "#fff", borderRadius: "14px", overflow: "hidden" }}>
+            <RegisterProgress
+                steps={STEPS}
+                current={progressStep}
+                detail={progressDetail}
+                onJump={slide < 4 ? jumpTo : undefined} />
+            <div style={{ flex: "1 1 0", minHeight: 0 }}>
+                <Carousel
+                    activeIndex={slide}
+                    style={{
+                        height: "100%",
+                        width: "100%",
+                    }}>
 
-            <EmailSlide
-                emailField={emailField}
-                setEmailField={setEmailField}
-                cb={() => {
-                    setRegisterTimer(() => startTimer());
-                    logEvent("register_start");
-                    nextSlide();
-                    fetchObjects();
-                }} />
+                    <AccountSlide
+                        emailField={emailField}
+                        setEmailField={setEmailField}
+                        nameField={nameField}
+                        setNameField={setNameField}
+                        cb={() => {
+                            setRegisterTimer(() => startTimer());
+                            logEvent("register_start");
+                            setSlide(1);
+                            fetchObjects();
+                        }} />
 
-            <DetailsSlide
-                nameField={nameField}
-                setNameField={setNameField}
-                onPrev={prevSlide}
-                onNext={nextSlide} />
+                    <NeoPassSlide
+                        mode="choose"
+                        prompt="Choose your objects, in order"
+                        hint="Order matters — apple then key is a different password from key then apple. Pick 6 to 8."
+                        objects={objects}
+                        onCountChange={setPickCount}
+                        onNext={onNeoPassSelect} />
 
-            <InfoSlide
-                onPrev={prevSlide}
-                onNext={nextSlide} />
+                    <NeoPassSlide
+                        mode="confirm"
+                        prompt="Enter it again to confirm"
+                        hint="Repeat your sequence from memory. Your entries stay masked — the real sign-in never echoes them back either."
+                        objects={objects}
+                        targetLength={neoPass.length}
+                        onCountChange={setPickCount}
+                        onNext={onNeoPassConfirm} />
 
-            <NeoPassSlide
-                step={4}
-                prompt="Choose your secret objects"
-                hint="Pick 6 to 8 objects — the order you pick them is part of your NeoPass."
-                objects={objects}
-                onPrev={prevSlide}
-                onNext={onNeoPassSelect} />
+                    <ReviewSlide
+                        setSlide={setSlide}
+                        onNext={registerUser} />
 
-            <NeoPassSlide
-                step={5}
-                prompt="Repeat your sequence"
-                hint="Select the same objects again, in the same order."
-                objects={objects}
-                onPrev={prevSlide}
-                onNext={onNeoPassConfirm} />
+                    <SuccessSlide />
 
-            <ReviewSlide
-                setSlide={setSlide}
-                onPrev={prevSlide}
-                onNext={registerUser} />
-
-            <SuccessSlide />
-
-        </Carousel>
+                </Carousel>
+            </div>
+        </div>
     )
 }
 
