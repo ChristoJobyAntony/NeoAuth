@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from . import models
 from .config import DIMENSION, IMAGES_DIR, OBJECTS_SVG_DIR
 
-WIDTH = 200
+WIDTH = 512
 
 SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG_NS)
@@ -55,11 +55,19 @@ def imageCreator(save_path: str, *files: str) -> None:
 
         x, y = random.choice(positions)
         positions.remove((x, y))
+        # Rotation, scale (via the cell inset) and a slight skew, per the
+        # proposal's image-manipulation operations.
         angle = random.random() * 360
+        skew = random.uniform(-12, 12)
         group = ET.SubElement(
             root,
             f"{{{SVG_NS}}}g",
-            {"transform": f"translate({x} {y}) rotate({angle} {cell / 2} {cell / 2})"},
+            {
+                "transform": (
+                    f"translate({x} {y}) rotate({angle} {cell / 2} {cell / 2}) "
+                    f"skewX({skew})"
+                )
+            },
         )
         group.append(inner)
 

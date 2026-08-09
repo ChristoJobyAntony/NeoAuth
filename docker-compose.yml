@@ -28,6 +28,8 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      HASH_PEPPER: ${HASH_PEPPER}
+      METRICS_TOKEN: ${METRICS_TOKEN}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
     volumes:
       - image_bucket:/app/images

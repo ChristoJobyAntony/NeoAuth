@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -33,6 +33,13 @@ class ImageSet(BaseImageSet):
     images: List[Image]
 
 
+class Challenge(BaseModel):
+    """A single-use authentication challenge: ordered image-sets, one secret
+    object to be found per set."""
+    uid: str
+    image_sets: List[ImageSet]
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -47,16 +54,14 @@ class UserCreate(UserBase):
     name: str
 
 
-class UserAuth(UserBase):
-    images: List[Image]
-
-
 class User(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     name: str
 
 
-class ImageSetGet(BaseModel):
-    exclude_uid: List[BaseImageSet]
-    user: User
+class MetricIn(BaseModel):
+    session: str
+    event: str
+    value_ms: Optional[int] = None
+    meta: Optional[str] = None
