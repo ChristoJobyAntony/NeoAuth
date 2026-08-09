@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import api from "./auth/api";
+import { useAuth } from "./auth/components/AuthProvider";
 import { _Object } from "./auth/types";
 import { mono, tokens } from "./theme";
 
@@ -10,6 +11,7 @@ import { mono, tokens } from "./theme";
 // itself, straight from the server.
 const Landing = () => {
     const navigate = useNavigate();
+    const auth = useAuth();
     const [objects, setObjects] = useState<_Object[]>([]);
 
     useEffect(() => {
@@ -69,12 +71,16 @@ const Landing = () => {
                 </Box>}
 
             <Box sx={{ display: "flex", gap: "14px" }}>
-                <Button variant="contained" size="large" onClick={() => navigate("/auth/register")}>
+                <Button variant="contained" size="large" disabled={!!auth.token} onClick={() => navigate("/auth/register")}>
                     Try the demo
                 </Button>
-                <Button variant="outlined" size="large" onClick={() => navigate("/auth")}>
-                    Sign in
-                </Button>
+                {auth.token
+                    ? <Button variant="outlined" size="large" onClick={() => navigate("/dash")}>
+                        Open dashboard
+                    </Button>
+                    : <Button variant="outlined" size="large" onClick={() => navigate("/auth")}>
+                        Sign in
+                    </Button>}
             </Box>
 
             <Typography sx={{ fontFamily: mono, fontSize: 11, color: tokens.inkSoft, letterSpacing: "0.06em" }}>
