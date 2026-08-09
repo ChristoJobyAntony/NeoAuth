@@ -70,7 +70,11 @@ jobs:
           fi
           git fetch origin
           git reset --hard "$GIT_SHA"
-          sudo docker compose --profile tunnel up --build -d
+          # Provenance attestations embed a build timestamp, giving every
+          # build a new image digest and forcing a container recreate even
+          # when nothing changed — disable them for reproducible deploys.
+          export BUILDX_NO_DEFAULT_ATTESTATIONS=1
+          sudo -E docker compose --profile tunnel up --build -d
           sudo docker image prune -f
           REMOTE
 
