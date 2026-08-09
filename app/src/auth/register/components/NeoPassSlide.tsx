@@ -1,4 +1,4 @@
-import { Box, Button, ButtonBase, Card, TextField, Typography } from "@mui/material";
+import { Box, Button, ButtonBase, Card, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import React, { useState } from "react";
 import { CarouselItem } from "../../../components/Carousel";
@@ -55,10 +55,11 @@ function SequenceTray({ selected }: { selected: _Object[] }) {
 
 function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
     const [selected, setSelected] = useState<_Object[]>([]);
-    const [query, setQuery] = useState("");
     const { enqueueSnackbar } = useSnackbar();
 
-    const visible = objects.filter((obj) => obj.name.toLowerCase().includes(query.toLowerCase()));
+    // Alphabetical order makes objects quick to find again — especially when
+    // repeating the sequence on the confirmation step.
+    const visible = [...objects].sort((a, b) => a.name.localeCompare(b.name));
 
     function onSelectObject(obj: _Object) {
         if (selected.some((s) => s.uid === obj.uid)) return;
@@ -70,7 +71,6 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
 
     function reset() {
         setSelected([]);
-        setQuery("");
     }
 
     function next() {
@@ -98,13 +98,6 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
                     <Typography variant="h5" sx={{ whiteSpace: "normal", px: 2 }}>{prompt}</Typography>
                     <Typography variant="body2" sx={{ whiteSpace: "normal", px: 3, mt: 0.5 }}>{hint}</Typography>
                 </div>
-
-                <TextField
-                    size="small"
-                    placeholder="Search objects"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    sx={{ width: "min(60%, 320px)" }} />
 
                 <Card
                     sx={{
