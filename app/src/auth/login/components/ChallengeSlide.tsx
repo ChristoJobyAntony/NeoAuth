@@ -33,7 +33,7 @@ function SequenceTray({ selections, current }: { selections: (Image | undefined)
                         width: 34,
                         height: 34,
                         borderRadius: "8px",
-                        border: i === current ? `2px solid ${tokens.cobalt}` : `1px solid ${tokens.line}`,
+                        border: i === current ? `2px solid ${tokens.accent}` : `1px solid ${tokens.line}`,
                         backgroundColor: tokens.card,
                         display: "flex",
                         alignItems: "center",

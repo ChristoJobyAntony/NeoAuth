@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { AppBar, Toolbar, Button, IconButton, Typography, Box, Drawer, List, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
+import { Box, Button, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LoginIcon from '@mui/icons-material/Login';
@@ -36,19 +36,24 @@ export function NavBar() {
   const visibleLinks = links.filter((link) => (link.public && !auth.token) || (!link.public && auth.token));
 
   return (
-    <AppBar position="static">
-      <Toolbar variant="dense" sx={{ minHeight: 56 }}>
+    <Box sx={{ padding: "16px 16px 0", flexShrink: 0 }}>
+      <Box
+        component="nav"
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: tokens.card,
+          borderRadius: "12px",
+          boxShadow: tokens.shadow1,
+          padding: "8px 16px",
+        }}>
 
-        <Box
-          sx={{
-            flex: "0 0",
-            display: { xs: "flex", md: "none" },
-          }}>
+        <Box sx={{ display: { xs: "flex", md: "none" } }}>
           <IconButton
             aria-label="menu"
             aria-controls="sideNavBar"
-            onClick={() => setSideNavMenu(true)}
-            color="inherit">
+            onClick={() => setSideNavMenu(true)}>
             <MenuIcon />
           </IconButton>
         </Box>
@@ -57,9 +62,7 @@ export function NavBar() {
           anchor="left"
           open={sideNavMenu}
           onClose={() => setSideNavMenu(false)}>
-          <Box
-            role="presentation"
-            onClick={() => setSideNavMenu(false)}>
+          <Box role="presentation" onClick={() => setSideNavMenu(false)}>
             <List sx={{ minWidth: "56vw" }}>
               {visibleLinks.map((link) =>
                 <ListItemButton key={link.name} onClick={link.action} >
@@ -71,42 +74,42 @@ export function NavBar() {
           </Box>
         </Drawer>
 
-        <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", gap: "10px" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <Button
-            color="inherit"
             aria-label="home"
             onClick={() => navigate("/")}
-            sx={{ gap: "8px", paddingInline: "6px" }}>
-            <ShieldOutlinedIcon sx={{ color: tokens.cobalt }} />
-            <Typography variant="h6" sx={{ letterSpacing: "-0.02em" }}>
+            sx={{ gap: "8px", paddingInline: "8px", color: tokens.ink, "&:hover": { backgroundColor: tokens.sunken } }}>
+            <ShieldOutlinedIcon sx={{ color: tokens.accent, fontSize: 20 }} />
+            <Typography sx={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.02em" }}>
               NeoAuth
             </Typography>
           </Button>
           <Typography
             sx={{
-              fontSize: 11,
-              letterSpacing: "0.12em",
-              color: tokens.inkSoft,
+              fontSize: 14,
+              color: tokens.inkFaint,
               display: { xs: "none", sm: "block" },
             }}>
-            COGNOMETRIC AUTH — RESEARCH DEMO
+            Graphical authentication — research demo
           </Typography>
         </Box>
 
-        <Box display={{ xs: "none", md: "flex" }} gap="6px">
+        <Box display={{ xs: "none", md: "flex" }} gap="8px">
           {visibleLinks.map((link, i) =>
             <Button
               key={link.name}
               onClick={link.action}
               startIcon={link.icon}
               variant={i === visibleLinks.length - 1 && !auth.token ? "contained" : "text"}
-              color={i === visibleLinks.length - 1 && !auth.token ? "primary" : "inherit"}>
+              sx={i === visibleLinks.length - 1 && !auth.token
+                ? {}
+                : { color: tokens.ink, "&:hover": { backgroundColor: tokens.sunken } }}>
               {link.name}
             </Button>
           )}
         </Box>
 
-      </Toolbar>
-    </AppBar>
+      </Box>
+    </Box>
   )
 }

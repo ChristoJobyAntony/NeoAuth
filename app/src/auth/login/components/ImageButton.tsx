@@ -23,7 +23,7 @@ export function ImageButton({ image, position, selected, onSelect }: props) {
                 height: "auto",
                 aspectRatio: "1",
                 borderRadius: "10px",
-                border: selected ? `3px solid ${tokens.cobalt}` : `1px solid ${tokens.line}`,
+                border: selected ? `3px solid ${tokens.accent}` : `1px solid ${tokens.line}`,
                 backgroundColor: "#fff",
                 padding: 0,
                 position: "relative",
@@ -48,7 +48,7 @@ export function ImageButton({ image, position, selected, onSelect }: props) {
                     top: 4,
                     right: 4,
                     lineHeight: 0,
-                    color: tokens.cobalt,
+                    color: tokens.accent,
                     backgroundColor: "#fff",
                     borderRadius: "50%",
                 }}>

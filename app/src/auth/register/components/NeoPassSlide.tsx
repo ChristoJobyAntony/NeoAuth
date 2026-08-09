@@ -34,7 +34,7 @@ function SequenceTray({ selected }: { selected: _Object[] }) {
                             width: 40,
                             height: 40,
                             borderRadius: "9px",
-                            border: obj ? `2px solid ${tokens.cobalt}` : `1px ${optional ? "dotted" : "dashed"} ${tokens.line}`,
+                            border: obj ? `2px solid ${tokens.accent}` : `1px ${optional ? "dotted" : "dashed"} ${tokens.line}`,
                             backgroundColor: tokens.card,
                             display: "flex",
                             alignItems: "center",
@@ -127,11 +127,11 @@ function NeoPassSlide({ step, prompt, hint, objects, onPrev, onNext }: props) {
                                         gap: "4px",
                                         padding: "8px 4px",
                                         borderRadius: "9px",
-                                        border: `1px solid ${isPicked ? tokens.cobalt : tokens.line}`,
+                                        border: `1px solid ${isPicked ? tokens.accent : tokens.line}`,
                                         opacity: isPicked ? 0.35 : 1,
                                         backgroundColor: tokens.card,
                                         transition: "border-color 120ms ease",
-                                        "&:hover": { borderColor: tokens.cobalt },
+                                        "&:hover": { borderColor: tokens.accent },
                                     }}>
                                     <img width="40" height="40" src={api.getObject(obj.uid)} alt={obj.name} />
                                     <Typography variant="caption" sx={{ color: tokens.inkSoft }}>

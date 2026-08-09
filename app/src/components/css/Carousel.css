@@ -1,8 +1,7 @@
 .carousel {
     overflow: hidden;
     height: 100%;
-    border: 1px solid #DCDFE4;
-    box-shadow: 0 12px 32px -18px rgba(27, 33, 48, 0.25);
+    box-shadow: 0 2px 4px rgba(20, 22, 26, .04), 0 8px 20px rgba(20, 22, 26, .07);
 }
 
 .inner {

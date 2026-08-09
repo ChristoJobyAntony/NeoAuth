@@ -40,7 +40,7 @@ function Dash() {
                                 sx={{
                                     height: 64,
                                     width: 64,
-                                    backgroundColor: tokens.cobalt,
+                                    backgroundColor: tokens.accent,
                                     fontWeight: 600,
                                     fontSize: 26,
                                 }}>
