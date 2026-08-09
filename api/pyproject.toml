@@ -1,23 +1,16 @@
-[tool.poetry]
-name = "NeoAuth"
-version = "0.1.0"
+[project]
+name = "neoauth-api"
+version = "1.0.0"
 description = "API for NeoAuth using FastAPI"
-authors = ["Christo <christotantony2003@gmail.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-svgmanip = "^0.0.10"
-mariadb = "^1.0.10"
-SQLAlchemy = "^1.4.31"
-fastapi = "^0.75.0"
-uvicorn = {extras = ["standard"], version = "^0.17.5"}
-pycairo = "^1.21.0"
-CairoSVG = "^2.5.2"
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-python-multipart = "^0.0.5"
-
-[tool.poetry.dev-dependencies]
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+authors = [{ name = "Christo", email = "christotantony2003@gmail.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "sqlalchemy>=2.0",
+    "pymysql>=1.1",
+    "cryptography>=44",
+    "pyjwt>=2.10",
+    "python-multipart>=0.0.20",
+    "cairosvg>=2.7",
+]

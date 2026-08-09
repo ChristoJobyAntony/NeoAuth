@@ -1,52 +1,62 @@
 from typing import List
-from pydantic import BaseModel
 
-class ObjectBase (BaseModel) :
-    uid : str
+from pydantic import BaseModel, ConfigDict
 
-class Object(ObjectBase) :
-    name : str
 
-    class Config : 
-        orm_mode = True
+class ObjectBase(BaseModel):
+    uid: str
 
-class ObjectList(BaseModel) : 
-    objects : list[Object]
 
-class Image (BaseModel) : 
-    uid : str
+class Object(ObjectBase):
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config : 
-        orm_mode = True
+    name: str
 
-class BaseImageSet (BaseModel) : 
-    uid : str 
 
-class ImageSet(BaseImageSet) :
-    images : List[Image]
-    class Config : 
-        orm_mode = True
+class ObjectList(BaseModel):
+    objects: List[Object]
 
-class Token (BaseModel) :
-    access_token : str
-    token_type : str
-    
-class UserBase (BaseModel) : 
-    email : str
 
-class UserCreate (UserBase) : 
-    objects : List[ObjectBase]
-    name : str
+class Image(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-class UserAuth (UserBase) :
-    images : List[Image]
+    uid: str
 
-class User (UserBase) : 
-    name : str
 
-    class Config : 
-        orm_mode = True
+class BaseImageSet(BaseModel):
+    uid: str
 
-class ImageSetGet (BaseModel) :
-    exclude_uid : List[BaseImageSet]
-    user : User
+
+class ImageSet(BaseImageSet):
+    model_config = ConfigDict(from_attributes=True)
+
+    images: List[Image]
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class UserBase(BaseModel):
+    email: str
+
+
+class UserCreate(UserBase):
+    objects: List[ObjectBase]
+    name: str
+
+
+class UserAuth(UserBase):
+    images: List[Image]
+
+
+class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    name: str
+
+
+class ImageSetGet(BaseModel):
+    exclude_uid: List[BaseImageSet]
+    user: User

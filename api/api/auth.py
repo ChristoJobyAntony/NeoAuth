@@ -1,47 +1,41 @@
-
 import hashlib
 import itertools
-from datetime import datetime, timedelta
-from typing import List
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from datetime import datetime, timedelta, timezone
+from typing import List, Optional
 
-from .config import *
-from . import schemas, models
+import jwt
+from fastapi.security import OAuth2PasswordBearer
+
+from . import models, schemas
+from .config import JWT_ALGORITHM, JWT_SECRET_KEY, TOKEN_VALIDITY_TIME
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-def authenticate_user (user: models.User, images : List[models.Image]) : 
-    object_set = [[obj.uid  for obj in image.objects] for image in images ]
-    product_object_set = itertools.product(*object_set)
-    for possibility in product_object_set :
-        if get_password_hash(user.email, possibility) == user.secret : 
+
+def authenticate_user(user: models.User, images: List[models.Image]) -> bool:
+    object_set = [[obj.uid for obj in image.objects] for image in images]
+    for possibility in itertools.product(*object_set):
+        if get_password_hash(user.email, possibility) == user.secret:
             return True
     return False
 
-def get_password_hash (email : str, objects_uid : List[str]):
-    secretString = "&".join(objects_uid) + email
-    return hashlib.sha256(secretString.encode("utf8")).hexdigest()
 
-def create_access_token (data : schemas.User) :
+def get_password_hash(email: str, objects_uid: List[str]) -> str:
+    secret_string = "&".join(objects_uid) + email
+    return hashlib.sha256(secret_string.encode("utf8")).hexdigest()
+
+
+def create_access_token(data: schemas.User) -> str:
     to_encode = {
-        "email" : data.email,
-        "exp" : datetime.utcnow() + timedelta(minutes=TOKEN_VALIDITY_TIME   )
-        }
-    return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM )
+        "email": data.email,
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=TOKEN_VALIDITY_TIME),
+    }
+    return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
-def get_email_from_token (token: str = Depends(oauth2_scheme)): 
+
+def get_email_from_token(token: str) -> Optional[str]:
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        email: str = payload.get("email")
-        if  email : return email
-    except JWTError:
+        return payload.get("email")
+    except jwt.PyJWTError:
         return None
-
-
-
-
-
-
-    

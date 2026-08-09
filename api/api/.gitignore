@@ -1,7 +1,1 @@
 __pycache__
-.vscode
-images/*
-secrets/*
-poetry.lock
-downloads
-objects/*
