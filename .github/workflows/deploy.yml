@@ -1,0 +1,82 @@
+# Deploys to the production VM over Tailscale SSH.
+#
+# The runner joins the tailnet as an ephemeral node tagged tag:ci (removed
+# automatically when the job ends), reaches the VM through Tailscale SSH —
+# no inbound ports are open on the VM — and rebuilds the compose stack from
+# the pushed commit. Application secrets live only in the VM's ~/NeoAuth/.env;
+# CI never sees them.
+#
+# Auth uses Tailscale workload identity federation (OIDC): GitHub mints a
+# short-lived signed token per run and Tailscale verifies its claims — no
+# long-lived secret is stored in GitHub at all.
+#
+# Required setup (once):
+#   - Tailscale admin console -> federated identity: issuer = GitHub Actions,
+#     subject claim = repo:ChristoJobyAntony/NeoAuth:environment:production,
+#     scope auth_keys (writable), tag tag:ci
+#   - GitHub environment "production" (restricted to master) with:
+#       TS_OAUTH_CLIENT_ID — the federated identity Client ID
+#       TS_AUDIENCE       — the federated identity Audience
+#   - Tailnet policy: tag:ci in tagOwners, plus an SSH rule letting
+#     tag:ci reach the VM as the deploy user (ubuntu)
+
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Lets the Tailscale action request an OIDC JWT from GitHub.
+  id-token: write
+
+# One deploy at a time; a newer push waits rather than interleaving.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  DEPLOY_HOST: oci-ts-relay-01
+  DEPLOY_USER: ubuntu
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+    steps:
+      - name: Join tailnet
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:ci
+
+      - name: Deploy
+        run: |
+          HOST_IP=$(tailscale ip -4 "$DEPLOY_HOST")
+          ssh -o StrictHostKeyChecking=accept-new "$DEPLOY_USER@$HOST_IP" \
+            GIT_SHA="$GITHUB_SHA" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          if [ ! -d ~/NeoAuth/.git ]; then
+            git clone https://github.com/ChristoJobyAntony/NeoAuth.git ~/NeoAuth
+          fi
+          cd ~/NeoAuth
+          if [ ! -f .env ]; then
+            echo "::error::~/NeoAuth/.env is missing on the VM — create it from .env.example first" >&2
+            exit 1
+          fi
+          git fetch origin
+          git reset --hard "$GIT_SHA"
+          sudo docker compose --profile tunnel up --build -d
+          sudo docker image prune -f
+          REMOTE
+
+      - name: Health check
+        run: |
+          HOST_IP=$(tailscale ip -4 "$DEPLOY_HOST")
+          ssh -o StrictHostKeyChecking=accept-new "$DEPLOY_USER@$HOST_IP" \
+            'curl -fsS --retry 12 --retry-delay 5 --retry-all-errors http://127.0.0.1:8080/api/ > /dev/null'
+          echo "Deployed $GITHUB_SHA and API is responding."
