@@ -66,14 +66,13 @@ const Register = () => {
         }
     }
 
-    // Which progress segment is live, and the sub-label under the bar.
+    // Which progress segment is live; while picking, that segment splits
+    // into one mini-block per object.
     const progressStep = slide >= 4 ? STEPS.length : slide;
-    const progressDetail =
-        slide === 0 ? "Your details"
-            : slide === 1 ? (pickCount >= 8 ? "8 of 8 — continue" : `Object ${pickCount + 1} — pick 6 to 8`)
-                : slide === 2 ? `Object ${Math.min(pickCount + 1, neoPass.length)} of ${neoPass.length} — re-entering`
-                    : slide === 3 ? "Final check"
-                        : "Complete";
+    const subProgress = {
+        1: { filled: pickCount, count: 8 },
+        2: { filled: pickCount, count: neoPass.length || 6 },
+    };
 
     // The progress bar is the back-navigation: completed segments jump.
     function jumpTo(step: number) {
@@ -86,7 +85,7 @@ const Register = () => {
             <RegisterProgress
                 steps={STEPS}
                 current={progressStep}
-                detail={progressDetail}
+                subProgress={subProgress}
                 onJump={slide < 4 ? jumpTo : undefined} />
             <div style={{ flex: "1 1 0", minHeight: 0 }}>
                 <Carousel

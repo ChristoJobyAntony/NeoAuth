@@ -1,4 +1,5 @@
 import { Box, Button, ButtonBase, Card, Typography } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { CarouselItem } from "../../../components/Carousel";
@@ -21,38 +22,60 @@ const MAX_OBJECTS = 8;
 const MIN_OBJECTS = 6;
 
 // The sequence tray: numbered slots that fill with the chosen objects, in
-// order. During confirmation entries stay masked — the same way the real
-// sign-in never echoes them back.
-function SequenceTray({ selected, masked, slots }: { selected: _Object[], masked: boolean, slots: number }) {
+// order. Undo lives here too — each filled slot carries a small ×. During
+// confirmation entries stay masked — the same way the real sign-in never
+// echoes them back.
+function SequenceTray({ selected, masked, slots, onRemove }: {
+    selected: _Object[], masked: boolean, slots: number, onRemove: (index: number) => void,
+}) {
     return (
-        <Box sx={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap" }}>
+        <Box sx={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap", padding: "4px 0" }}>
             {Array.from({ length: slots }, (_, i) => {
                 const obj = selected[i];
                 const optional = i >= MIN_OBJECTS;
                 const isNext = !obj && i === selected.length;
                 return (
-                    <Box
-                        key={`tray_slot_${i}`}
-                        title={obj && !masked ? `${i + 1}. ${obj.name}` : undefined}
-                        sx={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: "10px",
-                            border: obj || isNext
-                                ? `2px solid ${tokens.accent}`
-                                : `1px ${optional ? "dotted" : "dashed"} ${tokens.lineStrong}`,
-                            backgroundColor: isNext ? tokens.accentWash : tokens.card,
-                            boxShadow: obj ? tokens.shadow1 : "none",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: obj && masked ? 18 : 12,
-                            color: isNext ? tokens.accentDark : tokens.inkFaint,
-                            lineHeight: obj && !masked ? 0 : 1.4,
-                        }}>
-                        {obj
-                            ? (masked ? "•" : <img src={api.getObject(obj.uid)} width="30" height="30" alt={obj.name} />)
-                            : i + 1}
+                    <Box key={`tray_slot_${i}`} sx={{ position: "relative" }}>
+                        <Box
+                            title={obj && !masked ? `${i + 1}. ${obj.name}` : undefined}
+                            sx={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: "10px",
+                                border: obj || isNext
+                                    ? `2px solid ${tokens.accent}`
+                                    : `1px ${optional ? "dotted" : "dashed"} ${tokens.lineStrong}`,
+                                backgroundColor: isNext ? tokens.accentWash : tokens.card,
+                                boxShadow: obj ? tokens.shadow1 : "none",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: obj && masked ? 18 : 12,
+                                color: isNext ? tokens.accentDark : tokens.inkFaint,
+                                lineHeight: obj && !masked ? 0 : 1.4,
+                            }}>
+                            {obj
+                                ? (masked ? "•" : <img src={api.getObject(obj.uid)} width="30" height="30" alt={obj.name} />)
+                                : i + 1}
+                        </Box>
+                        {obj &&
+                            <ButtonBase
+                                aria-label={masked ? `Remove entry ${i + 1}` : `Remove ${obj.name}`}
+                                onClick={() => onRemove(i)}
+                                sx={{
+                                    position: "absolute",
+                                    top: -7,
+                                    right: -7,
+                                    width: 18,
+                                    height: 18,
+                                    borderRadius: "50%",
+                                    backgroundColor: tokens.ink,
+                                    color: "#fff",
+                                    boxShadow: tokens.shadow1,
+                                    "&:hover": { backgroundColor: tokens.danger },
+                                }}>
+                                <CloseIcon sx={{ fontSize: 12 }} />
+                            </ButtonBase>}
                     </Box>
                 )
             })}
@@ -167,30 +190,28 @@ function NeoPassSlide({ mode, prompt, hint, objects, targetLength, onCountChange
                     }
                 </Card>
 
-                <SequenceTray selected={selected} masked={confirming} slots={slots} />
+                <SequenceTray
+                    selected={selected}
+                    masked={confirming}
+                    slots={slots}
+                    onRemove={(i) => setSelected(selected.filter((_, j) => j !== i))} />
 
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "10px",
-                        width: "90%",
-                        minHeight: "38px",
-                    }}>
-                    <Button
-                        variant="text"
-                        disabled={selected.length === 0}
-                        onClick={() => setSelected(selected.slice(0, -1))}>
-                        Undo
-                    </Button>
-                    {!confirming &&
+                {!confirming &&
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            width: "90%",
+                            margin: "6px 0 10px",
+                        }}>
                         <Button
                             variant="contained"
                             disabled={selected.length < MIN_OBJECTS}
-                            onClick={next}>
+                            onClick={next}
+                            sx={{ paddingInline: "32px" }}>
                             Continue
-                        </Button>}
-                </div>
+                        </Button>
+                    </div>}
             </div>
         </CarouselItem>)
 }
