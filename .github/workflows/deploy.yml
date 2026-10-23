@@ -74,7 +74,11 @@ jobs:
           # build a new image digest and forcing a container recreate even
           # when nothing changed — disable them for reproducible deploys.
           export BUILDX_NO_DEFAULT_ATTESTATIONS=1
-          sudo -E docker compose --profile tunnel up --build -d
+          # --pull refreshes the base images (node, nginx, python) and the
+          # pinned service images on every deploy; without it BuildKit keeps
+          # reusing the digests it cached on the first build.
+          sudo -E docker compose --profile tunnel build --pull
+          sudo -E docker compose --profile tunnel up -d
           sudo docker image prune -f
           REMOTE
 

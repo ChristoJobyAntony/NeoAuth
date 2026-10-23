@@ -60,7 +60,9 @@ services:
   # Public ingress: outbound-only Cloudflare Tunnel, no open inbound ports.
   # Started with: docker compose --profile tunnel up -d
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    # Pinned so a deploy moves cloudflared deliberately; bump alongside the
+    # other base images when rebuilding.
+    image: cloudflare/cloudflared:2026.10.3
     container_name: neoauth-tunnel
     restart: unless-stopped
     command: tunnel --no-autoupdate run

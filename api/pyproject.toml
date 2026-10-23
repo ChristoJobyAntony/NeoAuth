@@ -10,8 +10,10 @@ dependencies = [
     "sqlalchemy>=2.0",
     "pymysql>=1.1",
     "cryptography>=44",
-    "pyjwt>=2.10",
+    "pyjwt>=2.15",
     "python-multipart>=0.0.20",
     "cairosvg>=2.7",
+    # Transitive via cairosvg; pinned for the Oct 2026 image-decoder CVE fixes.
+    "pillow>=13",
     "argon2-cffi>=23.1",
 ]
